@@ -32,7 +32,6 @@ func Login(c *fiber.Ctx) error {
 	// if error
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot parse JSON",
 			"error":   err.Error(),
 		})
@@ -45,7 +44,6 @@ func Login(c *fiber.Ctx) error {
 	err = userCollection.FindOne(c.Context(), query).Decode(user)
 	if (err != nil) || (user.Password != "" && !util.CheckPasswordHash(creds.Password, user.Password)) {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"success": false,
 			"message": "Login failed",
 		})
 	}
@@ -58,7 +56,7 @@ func Login(c *fiber.Ctx) error {
 
 	// Create token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	
+
 	// Encode token
 	encodedToken, err := token.SignedString(JwtSecretKey)
 
@@ -67,11 +65,8 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"data": fiber.Map{
-			"token": encodedToken,
-			"user":  util.GetSafeUser(user),
-		},
+		"user":  util.GetSafeUser(user),
+		"token": encodedToken,
 	})
 
 }
@@ -88,7 +83,6 @@ func GetAll(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
 			"message": "Something went wrong",
 			"error":   err.Error(),
 		})
@@ -100,17 +94,13 @@ func GetAll(c *fiber.Ctx) error {
 	err = cursor.All(c.Context(), &users)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
 			"message": "Something went wrong",
 			"error":   err.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"data": fiber.Map{
-			"users": users,
-		},
+		"users": users,
 	})
 }
 
@@ -128,7 +118,6 @@ func GetById(c *fiber.Ctx) error {
 	// if error while parsing paramID
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot parse id",
 			"error":   err,
 		})
@@ -142,17 +131,13 @@ func GetById(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"success": false,
 			"message": "User not found",
 			"error":   err,
 		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"data": fiber.Map{
-			"user": util.GetSafeUser(user),
-		},
+		"user": util.GetSafeUser(user),
 	})
 }
 
@@ -168,7 +153,6 @@ func Create(c *fiber.Ctx) error {
 	// if error
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot parse JSON",
 			"error":   err.Error(),
 		})
@@ -177,7 +161,6 @@ func Create(c *fiber.Ctx) error {
 	hashedPassword, err := util.HashPassword(data.Password)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
 			"message": "Something went wrong",
 			"error":   err.Error(),
 		})
@@ -191,7 +174,6 @@ func Create(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot insert user",
 			"error":   err.Error(),
 		})
@@ -205,17 +187,13 @@ func Create(c *fiber.Ctx) error {
 	userCollection.FindOne(c.Context(), query, projection).Decode(user)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"success": false,
 			"message": "Something went wrong",
 			"error":   err.Error(),
 		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"data": fiber.Map{
-			"user": user,
-		},
+		"user": user,
 	})
 }
 
@@ -233,7 +211,6 @@ func UpdateById(c *fiber.Ctx) error {
 	// if parameter cannot parse
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot parse id",
 			"error":   err.Error(),
 		})
@@ -245,7 +222,6 @@ func UpdateById(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot parse JSON",
 			"error":   err.Error(),
 		})
@@ -284,14 +260,12 @@ func UpdateById(c *fiber.Ctx) error {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"success": false,
-				"message": "User Not found",
+				"message": "User not found",
 				"error":   err,
 			})
 		}
 
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot update user",
 			"error":   err,
 		})
@@ -302,10 +276,7 @@ func UpdateById(c *fiber.Ctx) error {
 	userCollection.FindOne(c.Context(), query).Decode(user)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"success": true,
-		"data": fiber.Map{
-			"user": util.GetSafeUser(user),
-		},
+		"user": util.GetSafeUser(user),
 	})
 }
 
@@ -323,7 +294,6 @@ func DeleteById(c *fiber.Ctx) error {
 	// if parameter cannot parse
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot parse id",
 			"error":   err.Error(),
 		})
@@ -337,14 +307,12 @@ func DeleteById(c *fiber.Ctx) error {
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"success": false,
 				"message": "User Not found",
 				"error":   err.Error(),
 			})
 		}
 
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
 			"message": "Cannot delete user",
 			"error":   err.Error(),
 		})
