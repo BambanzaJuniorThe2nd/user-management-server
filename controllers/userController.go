@@ -132,7 +132,7 @@ func GetById(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "User not found",
-			"error":   err,
+			"error":   err.Error(),
 		})
 	}
 
@@ -158,7 +158,11 @@ func Create(c *fiber.Ctx) error {
 		})
 	}
 
+	if len(data.Password) == 0 {
+		data.Password = "defaultpassword"
+	}
 	hashedPassword, err := util.HashPassword(data.Password)
+
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Something went wrong",
