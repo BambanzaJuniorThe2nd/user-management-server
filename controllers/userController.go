@@ -4,6 +4,7 @@ import (
 	"os"
 	"server/config"
 	"server/models"
+	"server/security"
 	"server/util"
 	"time"
 
@@ -69,6 +70,47 @@ func Login(c *fiber.Ctx) error {
 		"token": encodedToken,
 	})
 
+}
+
+func GetByToken(c *fiber.Ctx) error {
+	userCollection := config.MI.DB.Collection("users")
+	data := new(models.GetByTokenArgs)
+
+	// Validation
+	err := c.BodyParser(&data)
+
+	// if error
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Cannot parse JSON",
+			"error":   err.Error(),
+		})
+	}
+
+	claims, err := security.ParseToken(data.Token)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid token",
+			"error":   err.Error(),
+		})
+	}
+
+	// find user and return
+	user := &models.User{}
+	query := bson.D{{Key: "_id", Value: claims.Id}}
+
+	err = userCollection.FindOne(c.Context(), query).Decode(user)
+
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "User not found",
+			"error":   err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"user": util.GetSafeUser(user),
+	})
 }
 
 // GetAll : get all users

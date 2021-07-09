@@ -14,3 +14,7 @@ type User struct {
 	CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty" bson:"updatedAt"`
 }
+
+type GetByTokenArgs struct {
+	Token string `json:"token,omitempty"`
+}

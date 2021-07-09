@@ -1,0 +1,39 @@
+version: "3"
+services:
+  mongo:
+    container_name: usr_mgt_db
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_URI: "mongodb://localhost:27017/usermanagement"
+      DB: "users"
+      APP_ENV: "development"
+    networks:
+      - usr-mgt-net
+    volumes:
+      - mongo-data:/data/db
+  app:
+    container_name: usr_mgt_api
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB: "users"
+      MONGO_URI: "mongodb://localhost:27017/usermanagement"
+      APP_ENV: "development"
+      JWT_SECRET_KEY: "secret"
+    networks:
+      - usr-mgt-net
+    volumes:
+      - mongo-data:/data/db
+    depends_on:
+      - mongo
+networks:
+  usr-mgt-net:
+    driver: bridge
+volumes:
+  mongo-data:
+    driver: local
