@@ -3,6 +3,8 @@ package util
 import (
 	"golang.org/x/crypto/bcrypt"
 	"server/models"
+	"github.com/gofiber/fiber/v2"
+	"strings"
 )
 
 type JError struct {
@@ -37,4 +39,15 @@ func GetSafeUser(user *models.User) models.User {
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
+}
+
+func ExtractToken(c *fiber.Ctx) string {
+    bearToken := c.Get("Authorization")
+
+    onlyToken := strings.Split(bearToken, " ")
+    if len(onlyToken) == 2 {
+        return onlyToken[1]
+    }
+
+    return ""
 }

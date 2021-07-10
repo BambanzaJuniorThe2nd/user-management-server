@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"os"
 	"server/config"
 	"server/models"
@@ -74,20 +75,11 @@ func Login(c *fiber.Ctx) error {
 
 func GetByToken(c *fiber.Ctx) error {
 	userCollection := config.MI.DB.Collection("users")
-	data := new(models.GetByTokenArgs)
+	token := util.ExtractToken(c)
 
-	// Validation
-	err := c.BodyParser(&data)
+	fmt.Println("token: ", token)
 
-	// if error
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Cannot parse JSON",
-			"error":   err.Error(),
-		})
-	}
-
-	claims, err := security.ParseToken(data.Token)
+	claims, err := security.ParseToken(token)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Invalid token",
@@ -95,9 +87,22 @@ func GetByToken(c *fiber.Ctx) error {
 		})
 	}
 
+	fmt.Println("claims.Id: ", claims.Id)
+
+	// convert claims.Id to objectId
+	id, err := primitive.ObjectIDFromHex(claims.Id)
+
+	// if error while parsing claims.Id
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Something went wrong",
+			"error":   err,
+		})
+	}
+
 	// find user and return
 	user := &models.User{}
-	query := bson.D{{Key: "_id", Value: claims.Id}}
+	query := bson.D{{Key: "_id", Value: id}}
 
 	err = userCollection.FindOne(c.Context(), query).Decode(user)
 
