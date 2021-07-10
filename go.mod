@@ -6,6 +6,8 @@ require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/gofiber/fiber/v2 v2.14.0
 	github.com/gofiber/jwt/v2 v2.2.4
 	github.com/joho/godotenv v1.3.0

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"server/models"
 	"strings"
 
@@ -56,4 +57,12 @@ func ExtractToken(c *fiber.Ctx) string {
 
 func ConvertStringIdIntoObjectId(id string) (primitive.ObjectID, error) {
 	return primitive.ObjectIDFromHex(id)
+}
+
+func ParseValidationError(err error) error {
+	if err != nil {
+		errorList := strings.Split(err.Error(), ";")
+		return errors.New(errorList[len(errorList)-1])
+	}
+	return nil
 }

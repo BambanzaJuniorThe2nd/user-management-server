@@ -7,6 +7,7 @@ import (
 	"server/models"
 	"server/security"
 	"server/util"
+	"server/validators"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -20,6 +21,8 @@ var (
 	JwtSecretKey     = []byte(os.Getenv("JWT_SECRET_KEY"))
 	JwtSigningMethod = jwt.SigningMethodHS256.Name
 )
+
+var DEFAULT_PASSWORD = "defaultpassword"
 
 func Login(c *fiber.Ctx) error {
 	userCollection := config.MI.DB.Collection("users")
@@ -188,13 +191,13 @@ func GetById(c *fiber.Ctx) error {
 }
 
 // Create : Create a new user
-func Create(c *fiber.Ctx) error {
+func CreateByAdmin(c *fiber.Ctx) error {
 	userCollection := config.MI.DB.Collection("users")
 
-	data := new(models.User)
+	args := models.CreateByAdminArgs{}
 
 	// Validation
-	err := c.BodyParser(&data)
+	err := c.BodyParser(&args)
 
 	// if error
 	if err != nil {
@@ -204,11 +207,15 @@ func Create(c *fiber.Ctx) error {
 		})
 	}
 
-	if len(data.Password) == 0 {
-		data.Password = "defaultpassword"
+	validationError := validators.ValidateCreateByAdminArgs(args)
+	if validationError != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Cannot parse JSON",
+			"error":   validationError.Error(),
+		})
 	}
-	hashedPassword, err := util.HashPassword(data.Password)
 
+	hashedPassword, err := util.HashPassword(DEFAULT_PASSWORD)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Something went wrong",
@@ -216,11 +223,18 @@ func Create(c *fiber.Ctx) error {
 		})
 	}
 
-	data.Password = hashedPassword
-	data.CreatedAt = time.Now()
-	data.UpdatedAt = time.Now()
+	// Create a User object
+	// mostly from args
+	newUser := models.User{
+		Name:      args.Name,
+		Email:     args.Email,
+		Title:     args.Title,
+		Password:  hashedPassword,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
-	result, err := userCollection.InsertOne(c.Context(), data)
+	result, err := userCollection.InsertOne(c.Context(), newUser)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
