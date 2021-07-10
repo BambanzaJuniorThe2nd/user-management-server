@@ -1,10 +1,12 @@
 package util
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"server/models"
-	"github.com/gofiber/fiber/v2"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type JError struct {
@@ -50,4 +52,8 @@ func ExtractToken(c *fiber.Ctx) string {
     }
 
     return ""
+}
+
+func ConvertStringIdIntoObjectId(id string) (primitive.ObjectID, error) {
+	return primitive.ObjectIDFromHex(id)
 }

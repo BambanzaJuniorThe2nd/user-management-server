@@ -12,7 +12,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -90,7 +89,7 @@ func GetByToken(c *fiber.Ctx) error {
 	fmt.Println("claims.Id: ", claims.Id)
 
 	// convert claims.Id to objectId
-	id, err := primitive.ObjectIDFromHex(claims.Id)
+	id, err := util.ConvertStringIdIntoObjectId(claims.Id)
 
 	// if error while parsing claims.Id
 	if err != nil {
@@ -160,7 +159,7 @@ func GetById(c *fiber.Ctx) error {
 	paramID := c.Params("id")
 
 	// convert paramID to objectId
-	id, err := primitive.ObjectIDFromHex(paramID)
+	id, err := util.ConvertStringIdIntoObjectId(paramID)
 
 	// if error while parsing paramID
 	if err != nil {
@@ -257,7 +256,7 @@ func UpdateById(c *fiber.Ctx) error {
 	paramID := c.Params("id")
 
 	// convert paramID to objectId
-	id, err := primitive.ObjectIDFromHex(paramID)
+	id, err := util.ConvertStringIdIntoObjectId(paramID)
 
 	// if parameter cannot parse
 	if err != nil {
@@ -340,7 +339,7 @@ func DeleteById(c *fiber.Ctx) error {
 	paramID := c.Params("id")
 
 	// convert parameter to object id
-	id, err := primitive.ObjectIDFromHex(paramID)
+	id, err := util.ConvertStringIdIntoObjectId(paramID)
 
 	// if parameter cannot parse
 	if err != nil {
