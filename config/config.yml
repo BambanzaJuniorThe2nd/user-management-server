@@ -1,5 +1,5 @@
 environment: dev
-JWT_SECRET_KEY: secret
+token: secret
 mongo:
   server: mongodb://mongo:27017
   database: usermanagement
