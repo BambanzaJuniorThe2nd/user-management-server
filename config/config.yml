@@ -1,0 +1,6 @@
+environment: dev
+JWT_SECRET_KEY: secret
+mongo:
+  server: mongodb://mongo:27017
+  database: usermanagement
+  collection: users
