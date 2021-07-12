@@ -1,6 +1,10 @@
 package util
 
-import "errors"
+import (
+	"errors"
+	"github.com/gofiber/fiber/v2"
+)
+
 
 var (
 	ErrInvalidEmail       = errors.New("invalid email")
@@ -10,3 +14,9 @@ var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrUnauthorized       = errors.New("Unauthorized")
 )
+
+func HandleParsingError(c *fiber.Ctx, parsingError error) error{
+	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		"message": parsingError.Error(),
+	})
+}

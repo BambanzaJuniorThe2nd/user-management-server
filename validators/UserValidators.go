@@ -22,3 +22,14 @@ func ValidateCreateByAdminArgs(args models.CreateByAdminArgs) error {
 
 	return util.ParseValidationError(err)
 }
+
+func ValidateLoginArgs(args *models.LoginArgs) error {
+	err := validation.ValidateStruct(&args,
+		// Email cannot be empty, and must be a valid email
+		validation.Field(&args.Email, validation.Required.Error("email is required"), is.Email.Error("Invalid email")),
+		// Password cannot be empty, and must be a date string of the format "YYYY-MM-DD"
+		validation.Field(&args.Password, validation.Required.Error("password is required")),
+	)
+
+	return util.ParseValidationError(err)
+}

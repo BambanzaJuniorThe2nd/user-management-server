@@ -66,3 +66,12 @@ func ParseValidationError(err error) error {
 	}
 	return nil
 }
+
+func RetrieveLoginRequestData(c* fiber.Ctx) (*models.LoginArgs, error) {
+	// Create a creds object 
+	// with the LoginArgs structure
+	creds := new(models.LoginArgs)
+
+	err := c.BodyParser(&creds)
+	return creds, err
+}

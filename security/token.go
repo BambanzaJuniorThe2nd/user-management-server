@@ -3,8 +3,9 @@ package security
 import (
 	"fmt"
 	"os"
-	"time"
+	"server/models"
 	"server/util"
+	"time"
 
 	jwt "github.com/form3tech-oss/jwt-go"
 )
@@ -14,13 +15,28 @@ var (
 	JwtSigningMethod = jwt.SigningMethodHS256.Name
 )
 
-func NewToken(userId string) (string, error) {
-	claims := jwt.StandardClaims{
-		Id:        userId,
-		Issuer:    userId,
-		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+type MyCustomClaims struct {
+	jwt.StandardClaims
+	IsAdmin bool `json:"isAdmin"`
+}
+
+func NewToken(user *models.User) (string, error) {
+	// Create the Claims
+	claims := MyCustomClaims{
+		jwt.StandardClaims{
+			Id:        user.ID,
+			Issuer:    user.ID,
+			IssuedAt:  time.Now().Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+		},
+		user.IsAdmin,
 	}
+	// claims := jwt.StandardClaims{
+	// 	Id:        user.Id,
+	// 	Issuer:    user.Id,
+	// 	IssuedAt:  time.Now().Unix(),
+	// 	ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+	// }
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(JwtSecretKey)
 }

@@ -1,4 +1,5 @@
 environment: dev
+port: 3000
 token: secret
 mongo:
   server: mongodb://mongo:27017
