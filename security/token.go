@@ -48,14 +48,14 @@ func validateSignedMethod(token *jwt.Token) (interface{}, error) {
 	return JwtSecretKey, nil
 }
 
-func ParseToken(tokenString string) (*jwt.StandardClaims, error) {
-	claims := new(jwt.StandardClaims)
+func ParseToken(tokenString string) (*MyCustomClaims, error) {
+	claims := new(MyCustomClaims)
 	token, err := jwt.ParseWithClaims(tokenString, claims, validateSignedMethod)
 	if err != nil {
 		return nil, err
 	}
 	var ok bool
-	claims, ok = token.Claims.(*jwt.StandardClaims)
+	claims, ok = token.Claims.(*MyCustomClaims)
 	if !ok || !token.Valid {
 		return nil, util.ErrInvalidAuthToken
 	}

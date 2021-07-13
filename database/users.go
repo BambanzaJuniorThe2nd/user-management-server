@@ -53,6 +53,15 @@ func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fi
 	return result, fiber.Error{}
 }
 
+func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models.User, fiber.Error) {
+	user := models.User{}
+
+	validationError := validators.ValidateCreateByAdminArgs(args)
+	if validationError != nil {
+		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
+	}
+}
+
 // func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.Error) {
 // 	user := models.User{}
 

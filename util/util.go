@@ -4,6 +4,7 @@ import (
 	"errors"
 	"server/models"
 	"strings"
+	"server/security"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -74,4 +75,22 @@ func RetrieveLoginRequestData(c *fiber.Ctx) (models.LoginArgs, error) {
 
 	err := c.BodyParser(&creds)
 	return creds, err
+}
+
+func RetrieveCreateRequestData(c *fiber.Ctx) (models.CreateArgs, error) {
+	data := models.CreateArgs{}
+
+	err := c.BodyParser(&data)
+	return data, err
+}
+
+func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {
+	token := ExtractToken(c)
+
+	claims, err := security.ParseToken(token)
+	if err != nil {
+		return false, err
+	}
+
+	return claims.IsAdmin, nil
 }

@@ -8,23 +8,40 @@ import (
 )
 
 func CreateHandler(c *fiber.Ctx) error {
-	// Read in credentials
-	creds, parsingError := util.RetrieveLoginRequestData(c)
+	// Read in user details
+	userDetails, parsingError := util.RetrieveCreateRequestData(c)
 
 	if parsingError != nil {
 		return util.HandleParsingError(c, parsingError)
 	}
 
+	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
-	res, err := database.Login(dbClient, creds)
 
-	// Check whether fields within err
-	// are not set to their zero values
-	if (fiber.Error{}) != err {
-		return c.Status(err.Code).JSON(fiber.Map{
-			"message": err.Message,
+	isAdmin, err := util.IsRequestFromAdmin(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
 		})
 	}
+	
+	// If request came from admin
+	if isAdmin {
+		res, err := database.CreateByAdmin(dbClient, userDetails)
+	} else {
+		res, err := database.Create(dbClient, userDetails)
+	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
+	// dbClient := c.Locals("dbClient").(*database.UsersClient)
+	// res, err := database.Login(dbClient, userDetails)
+
+	// // Check whether fields within err
+	// // are not set to their zero values
+	// if (fiber.Error{}) != err {
+	// 	return c.Status(err.Code).JSON(fiber.Map{
+	// 		"message": err.Message,
+	// 	})
+	// }
+
+	// return c.Status(fiber.StatusOK).JSON(res)
 }
