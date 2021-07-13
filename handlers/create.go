@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func LoginHandler(c *fiber.Ctx) error {
+func CreateHandler(c *fiber.Ctx) error {
 	// Read in credentials
 	creds, parsingError := util.RetrieveLoginRequestData(c)
 

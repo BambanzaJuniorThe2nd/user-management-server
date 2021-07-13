@@ -40,7 +40,7 @@ func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fi
 
 	err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(user)
 	if (err != nil) || (user.Password != "" && !util.CheckPasswordHash(args.Password, user.Password)) {
-		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: "Login failed" }
+		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: "Login failed"}
 	}
 
 	token, tokenError := security.NewToken(user)
@@ -51,11 +51,13 @@ func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fi
 	result.Token = token
 	result.User = util.GetSafeUser(user)
 	return result, fiber.Error{}
-
-	// res, err := c.Col.InsertOne(c.Ctx, docs)
-	// if err != nil {
-	// 	return todo, err
-	// }
-	// id := res.InsertedID.(primitive.ObjectID).Hex()
-	// return c.Get(id)
 }
+
+// func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.Error) {
+// 	user := models.User{}
+
+// 	validationError := validators.ValidateCreateArgs(args)
+// 	if validationError != nil {
+// 		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
+// 	}
+// }

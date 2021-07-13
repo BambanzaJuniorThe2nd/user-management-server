@@ -9,7 +9,7 @@ import (
     jwtware "github.com/gofiber/jwt/v2"
 )
 
-func AuthRequired(ctx *fiber.Ctx) error {
+func RequireAuth(ctx *fiber.Ctx) error {
 	return jwtware.New(jwtware.Config{
 		SigningKey:    security.JwtSecretKey,
 		SigningMethod: security.JwtSigningMethod,
