@@ -33,11 +33,11 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func GetSafeUser(user *models.User) models.User {
-	return models.User {
-		ID: user.ID,
-		Name: user.Name,
-		Email: user.Email,
-		Title: user.Title,
+	return models.User{
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Title:     user.Title,
 		Birthdate: user.Birthdate,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
@@ -45,14 +45,14 @@ func GetSafeUser(user *models.User) models.User {
 }
 
 func ExtractToken(c *fiber.Ctx) string {
-    bearToken := c.Get("Authorization")
+	bearToken := c.Get("Authorization")
 
-    onlyToken := strings.Split(bearToken, " ")
-    if len(onlyToken) == 2 {
-        return onlyToken[1]
-    }
+	onlyToken := strings.Split(bearToken, " ")
+	if len(onlyToken) == 2 {
+		return onlyToken[1]
+	}
 
-    return ""
+	return ""
 }
 
 func ConvertStringIdIntoObjectId(id string) (primitive.ObjectID, error) {
@@ -62,15 +62,15 @@ func ConvertStringIdIntoObjectId(id string) (primitive.ObjectID, error) {
 func ParseValidationError(err error) error {
 	if err != nil {
 		errorList := strings.Split(err.Error(), ";")
-		return errors.New(errorList[len(errorList)-1])
+		return errors.New(errorList[0])
 	}
 	return nil
 }
 
-func RetrieveLoginRequestData(c* fiber.Ctx) (*models.LoginArgs, error) {
-	// Create a creds object 
+func RetrieveLoginRequestData(c *fiber.Ctx) (models.LoginArgs, error) {
+	// Create an empty creds object
 	// with the LoginArgs structure
-	creds := new(models.LoginArgs)
+	creds := models.LoginArgs{}
 
 	err := c.BodyParser(&creds)
 	return creds, err

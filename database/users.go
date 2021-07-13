@@ -3,9 +3,9 @@ package database
 import (
 	"context"
 	"server/models"
+	"server/security"
 	"server/util"
 	"server/validators"
-	"server/security"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,12 +26,12 @@ type UserServiceInterface interface {
 	Login(models.LoginArgs) (models.User, fiber.Error)
 }
 
-func Login(dbClient *UsersClient, args *models.LoginArgs) (models.LoginResult, fiber.Error) {
+func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fiber.Error) {
 	result := models.LoginResult{}
 
 	validationError := validators.ValidateLoginArgs(args)
 	if validationError != nil {
-		return result, fiber.Error{ Code: fiber.StatusBadRequest, Message:  validationError.Error() }
+		return result, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
 	}
 
 	// Query user with provided email
@@ -40,17 +40,13 @@ func Login(dbClient *UsersClient, args *models.LoginArgs) (models.LoginResult, f
 
 	err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(user)
 	if (err != nil) || (user.Password != "" && !util.CheckPasswordHash(args.Password, user.Password)) {
-		return result, fiber.Error{ Code: fiber.StatusUnauthorized, Message: "Login failed" }
-		// return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-		// 	"message": "Login failed",
-		// })
+		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: "Login failed" }
 	}
 
 	token, tokenError := security.NewToken(user)
 	if tokenError != nil {
-		return result, fiber.Error{ Code: fiber.StatusInternalServerError, Message: "Something went wrong" }
+		return result, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
 	}
-
 
 	result.Token = token
 	result.User = util.GetSafeUser(user)
