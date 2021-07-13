@@ -2,19 +2,13 @@ package handlers
 
 import (
 	"server/database"
+	"server/models"
 	"server/util"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func CreateHandler(c *fiber.Ctx) error {
-	// Read in user details
-	userDetails, parsingError := util.RetrieveCreateRequestData(c)
-
-	if parsingError != nil {
-		return util.HandleParsingError(c, parsingError)
-	}
-
 	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
 
@@ -24,24 +18,31 @@ func CreateHandler(c *fiber.Ctx) error {
 			"message": err.Error(),
 		})
 	}
-	
-	// If request came from admin
-	if isAdmin {
-		res, err := database.CreateByAdmin(dbClient, userDetails)
-	} else {
-		res, err := database.Create(dbClient, userDetails)
+
+	userDetails, parsingError := util.RetrieveCreateRequestData(c, isAdmin)
+	if parsingError != nil {
+		return util.HandleParsingError(c, parsingError)
 	}
 
-	// dbClient := c.Locals("dbClient").(*database.UsersClient)
-	// res, err := database.Login(dbClient, userDetails)
+	var res models.User
+	if isAdmin {
+		user, err := database.CreateByAdmin(dbClient, userDetails.(models.CreateByAdminArgs))
+		if (fiber.Error{}) != err {
+			return c.Status(err.Code).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+		res = user
+	} else {
+		user, err := database.Create(dbClient, userDetails.(models.CreateArgs))
+		if (fiber.Error{}) != err {
+			return c.Status(err.Code).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
 
-	// // Check whether fields within err
-	// // are not set to their zero values
-	// if (fiber.Error{}) != err {
-	// 	return c.Status(err.Code).JSON(fiber.Map{
-	// 		"message": err.Message,
-	// 	})
-	// }
+		res = user
+	}
 
-	// return c.Status(fiber.StatusOK).JSON(res)
+	return c.Status(fiber.StatusCreated).JSON(res)
 }

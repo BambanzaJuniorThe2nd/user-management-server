@@ -6,6 +6,7 @@ import (
 	"server/security"
 	"server/util"
 	"server/validators"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,14 +18,7 @@ type UsersClient struct {
 	Col *mongo.Collection
 }
 
-type UserServiceInterface interface {
-	// Insert(models.Todo) (models.Todo, error)
-	// Update(string, interface{}) (models.TodoUpdate, error)
-	// Delete(string) (models.TodoDelete, error)
-	// Get(string) (models.Todo, error)
-	// Search(interface{}) ([]models.Todo, error)
-	Login(models.LoginArgs) (models.User, fiber.Error)
-}
+var DEFAULT_PASSWORD = "defaultPassword1"
 
 func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fiber.Error) {
 	result := models.LoginResult{}
@@ -35,15 +29,15 @@ func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fi
 	}
 
 	// Query user with provided email
-	user := &models.User{}
+	user := models.User{}
 	query := bson.D{{Key: "email", Value: args.Email}}
 
-	err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(user)
+	err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
 	if (err != nil) || (user.Password != "" && !util.CheckPasswordHash(args.Password, user.Password)) {
 		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: "Login failed"}
 	}
 
-	token, tokenError := security.NewToken(user)
+	token, tokenError := security.NewToken(&user)
 	if tokenError != nil {
 		return result, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
 	}
@@ -60,13 +54,77 @@ func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models
 	if validationError != nil {
 		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
 	}
+
+	hashedPassword, err := util.HashPassword(DEFAULT_PASSWORD)
+	if err != nil {
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	// Create a User object
+	// mostly from args
+	user = models.User{
+		Name:      args.Name,
+		Email:     args.Email,
+		Title:     args.Title,
+		Password:  hashedPassword,
+		IsAdmin:   args.IsAdmin,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
+	if err != nil {
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	// get the inserted user
+	user = models.User{}
+	query := bson.D{{Key: "_id", Value: result.InsertedID}}
+
+	if err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user); err != nil {
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	return util.GetSafeUser(user), fiber.Error{}
 }
 
-// func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.Error) {
-// 	user := models.User{}
+func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.Error) {
+	user := models.User{}
 
-// 	validationError := validators.ValidateCreateArgs(args)
-// 	if validationError != nil {
-// 		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
-// 	}
-// }
+	validationError := validators.ValidateCreateArgs(args)
+	if validationError != nil {
+		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
+	}
+
+	hashedPassword, err := util.HashPassword(args.Password)
+	if err != nil {
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	// Create a User object
+	// mostly from args
+	user = models.User{
+		Name:      args.CreateByAdminArgs.Name,
+		Email:     args.CreateByAdminArgs.Email,
+		Title:     args.CreateByAdminArgs.Title,
+		IsAdmin:   args.CreateByAdminArgs.IsAdmin,
+		Password:  hashedPassword,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
+	if err != nil {
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	// get the inserted user
+	user = models.User{}
+	query := bson.D{{Key: "_id", Value: result.InsertedID}}
+
+	if err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user); err != nil {
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	return util.GetSafeUser(user), fiber.Error{}
+}

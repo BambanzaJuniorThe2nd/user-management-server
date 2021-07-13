@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"server/models"
-	"server/util"
+	"errors"
 	"time"
 
 	jwt "github.com/form3tech-oss/jwt-go"
@@ -13,6 +13,15 @@ import (
 var (
 	JwtSecretKey     = []byte(os.Getenv("JWT_SECRET_KEY"))
 	JwtSigningMethod = jwt.SigningMethodHS256.Name
+)
+
+var (
+	ErrInvalidEmail       = errors.New("invalid email")
+	ErrEmailAlreadyExists = errors.New("email already exists")
+	ErrEmptyPassword      = errors.New("password can't be empty")
+	ErrInvalidAuthToken   = errors.New("invalid auth-token")
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrUnauthorized       = errors.New("Unauthorized")
 )
 
 type MyCustomClaims struct {
@@ -57,7 +66,7 @@ func ParseToken(tokenString string) (*MyCustomClaims, error) {
 	var ok bool
 	claims, ok = token.Claims.(*MyCustomClaims)
 	if !ok || !token.Valid {
-		return nil, util.ErrInvalidAuthToken
+		return nil, ErrInvalidAuthToken
 	}
 	return claims, nil
 }

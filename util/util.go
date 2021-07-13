@@ -3,8 +3,8 @@ package util
 import (
 	"errors"
 	"server/models"
-	"strings"
 	"server/security"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,7 +33,7 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func GetSafeUser(user *models.User) models.User {
+func GetSafeUser(user models.User) models.User {
 	return models.User{
 		ID:        user.ID,
 		Name:      user.Name,
@@ -77,8 +77,20 @@ func RetrieveLoginRequestData(c *fiber.Ctx) (models.LoginArgs, error) {
 	return creds, err
 }
 
-func RetrieveCreateRequestData(c *fiber.Ctx) (models.CreateArgs, error) {
-	data := models.CreateArgs{}
+func RetrieveCreateRequestData(c *fiber.Ctx, isAdmin bool) (interface{}, error) {
+	var data interface{}
+	if isAdmin {
+		data = models.CreateByAdminArgs{}
+	} else {
+		data = models.CreateArgs{}
+	}
+
+	err := c.BodyParser(&data)
+	return data, err
+}
+
+func RetrieveCreateByAdminRequestData(c *fiber.Ctx) (models.CreateByAdminArgs, error) {
+	data := models.CreateByAdminArgs{}
 
 	err := c.BodyParser(&data)
 	return data, err
