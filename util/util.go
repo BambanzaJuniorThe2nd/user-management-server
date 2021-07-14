@@ -78,22 +78,15 @@ func RetrieveLoginRequestData(c *fiber.Ctx) (models.LoginArgs, error) {
 }
 
 func RetrieveCreateRequestData(c *fiber.Ctx, isAdmin bool) (interface{}, error) {
-	var data interface{}
 	if isAdmin {
-		data = models.CreateByAdminArgs{}
+		data := models.CreateByAdminArgs{}
+		err := c.BodyParser(&data)
+		return data, err
 	} else {
-		data = models.CreateArgs{}
+		data := models.CreateArgs{}
+		err := c.BodyParser(&data)
+		return data, err
 	}
-
-	err := c.BodyParser(&data)
-	return data, err
-}
-
-func RetrieveCreateByAdminRequestData(c *fiber.Ctx) (models.CreateByAdminArgs, error) {
-	data := models.CreateByAdminArgs{}
-
-	err := c.BodyParser(&data)
-	return data, err
 }
 
 func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {

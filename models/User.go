@@ -36,7 +36,7 @@ type CreateByAdminArgs struct {
 }
 
 type CreateArgs struct {
-	CreateByAdminArgs CreateByAdminArgs
+	CreateByAdminArgs
 	Password string
 }
 

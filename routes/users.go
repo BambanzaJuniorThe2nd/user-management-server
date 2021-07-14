@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"server/middleware"
+	// "server/middleware"
 	"server/handlers"
 )
 
@@ -13,6 +13,6 @@ func UsersRoute(route fiber.Router) {
 	// route.Post("/", middleware.AuthRequired, controllers.CreateByAdmin)
 	// route.Put("/:id", middleware.AuthRequired, controllers.UpdateById)
 	// route.Delete("/:id", middleware.AuthRequired, controllers.DeleteById)
-	route.Post("/", middleware.RequireAuth, handlers.CreateHandler)
+	route.Post("/", handlers.CreateHandler)
 	route.Post("/login", handlers.LoginHandler)
 }

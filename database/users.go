@@ -74,7 +74,11 @@ func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models
 
 	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
 	if err != nil {
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
+			return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "email already in use"}
+		}
+
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
 	}
 
 	// get the inserted user
@@ -115,7 +119,11 @@ func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.E
 
 	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
 	if err != nil {
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
+			return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "email already in use"}
+		}
+
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
 	}
 
 	// get the inserted user

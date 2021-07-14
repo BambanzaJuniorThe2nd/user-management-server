@@ -12,12 +12,13 @@ func CreateHandler(c *fiber.Ctx) error {
 	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
 
-	isAdmin, err := util.IsRequestFromAdmin(c)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
+	// isAdmin, err := util.IsRequestFromAdmin(c)
+	isAdmin := true
+	// if err != nil {
+	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 	})
+	// }
 
 	userDetails, parsingError := util.RetrieveCreateRequestData(c, isAdmin)
 	if parsingError != nil {
