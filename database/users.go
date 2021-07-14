@@ -60,12 +60,19 @@ func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models
 		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
 
+	// Parse args.CreateByAdminArgs.Birthdate
+	birthdate, err := time.Parse("2006-01-02", args.Birthdate)
+	if err != nil {
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
 	// Create a User object
 	// mostly from args
 	user = models.User{
 		Name:      args.Name,
 		Email:     args.Email,
 		Title:     args.Title,
+		Birthdate: birthdate,
 		Password:  hashedPassword,
 		IsAdmin:   args.IsAdmin,
 		CreatedAt: time.Now(),
@@ -105,12 +112,19 @@ func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.E
 		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
 
+	// Parse args.CreateByAdminArgs.Birthdate
+	birthdate, err := time.Parse("2006-01-02", args.CreateByAdminArgs.Birthdate)
+	if err != nil {
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
 	// Create a User object
 	// mostly from args
 	user = models.User{
 		Name:      args.CreateByAdminArgs.Name,
 		Email:     args.CreateByAdminArgs.Email,
 		Title:     args.CreateByAdminArgs.Title,
+		Birthdate: birthdate, 
 		IsAdmin:   args.CreateByAdminArgs.IsAdmin,
 		Password:  hashedPassword,
 		CreatedAt: time.Now(),

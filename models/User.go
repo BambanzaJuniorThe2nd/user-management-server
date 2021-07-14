@@ -11,7 +11,7 @@ type User struct {
 	Title     string    `json:"title,omitempty" bson:"title"`
 	Birthdate time.Time `json:"birthdate,omitempty" bson:"birthdate"`
 	Password  string    `json:"password,omitempty" bson:"password"`
-	IsAdmin   bool      `json:"isAdmin,omitempty" bson:"isAdmin"`
+	IsAdmin   bool      `json:"isAdmin" bson:"isAdmin"`
 	CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt,omitempty" bson:"updatedAt"`
 }

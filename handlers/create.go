@@ -13,7 +13,7 @@ func CreateHandler(c *fiber.Ctx) error {
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
 
 	// isAdmin, err := util.IsRequestFromAdmin(c)
-	isAdmin := true
+	isAdmin := false
 	// if err != nil {
 	// 	return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 	// 		"message": err.Error(),

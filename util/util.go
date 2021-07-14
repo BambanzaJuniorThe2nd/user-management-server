@@ -40,6 +40,7 @@ func GetSafeUser(user models.User) models.User {
 		Email:     user.Email,
 		Title:     user.Title,
 		Birthdate: user.Birthdate,
+		IsAdmin:   user.IsAdmin,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
