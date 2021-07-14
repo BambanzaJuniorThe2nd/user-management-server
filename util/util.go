@@ -102,7 +102,7 @@ func RetrieveUpdateRequestData(c *fiber.Ctx, isAdmin bool) (primitive.ObjectID, 
 		err := c.BodyParser(&data)
 		return id, data, err
 	} else {
-		data := models.CreateArgs{}
+		data := models.UpdateArgs{}
 		err := c.BodyParser(&data)
 		return id, data, err
 	}
