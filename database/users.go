@@ -171,6 +171,8 @@ func UpdateByAdmin(dbClient *UsersClient, id primitive.ObjectID, args models.Upd
 		{Key: "email", Value: args.CreateByAdminArgs.Email},
 		{Key: "title", Value: args.CreateByAdminArgs.Title},
 		{Key: "birthdate", Value: birthdate},
+		{Key: "isAdmin", Value: args.CreateByAdminArgs.IsAdmin},
+		{Key: "updatedAt", Value: time.Now()},
 	}
 
 	query := bson.D{{Key: "_id", Value: id}}
@@ -221,6 +223,7 @@ func Update(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateArgs
 		{Key: "title", Value: args.CreateByAdminArgs.Title},
 		{Key: "birthdate", Value: birthdate},
 		{Key: "password", Value: hashedPassword},
+		{Key: "updatedAt", Value: time.Now()},
 	}
 
 	query := bson.D{{Key: "_id", Value: id}}
