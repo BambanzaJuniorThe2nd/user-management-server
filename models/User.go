@@ -40,6 +40,14 @@ type CreateArgs struct {
 	Password string
 }
 
+type UpdateByAdminArgs struct {
+	CreateByAdminArgs
+}
+
+type UpdateArgs struct {
+	CreateArgs
+}
+
 type LoginArgs struct {
 	Email    string
 	Password string

@@ -1,10 +1,10 @@
 package security
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"server/models"
-	"errors"
 	"time"
 
 	jwt "github.com/form3tech-oss/jwt-go"
@@ -36,16 +36,10 @@ func NewToken(user *models.User) (string, error) {
 			Id:        user.ID,
 			Issuer:    user.ID,
 			IssuedAt:  time.Now().Unix(),
-			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 		},
 		user.IsAdmin,
 	}
-	// claims := jwt.StandardClaims{
-	// 	Id:        user.Id,
-	// 	Issuer:    user.Id,
-	// 	IssuedAt:  time.Now().Unix(),
-	// 	ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
-	// }
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(JwtSecretKey)
 }

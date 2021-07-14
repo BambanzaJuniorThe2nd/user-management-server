@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -18,7 +19,7 @@ type UsersClient struct {
 	Col *mongo.Collection
 }
 
-var DEFAULT_PASSWORD = "defaultPassword1"
+var DEFAULT_PASSWORD = "defaultPassword1@"
 
 func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fiber.Error) {
 	result := models.LoginResult{}
@@ -124,7 +125,7 @@ func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.E
 		Name:      args.CreateByAdminArgs.Name,
 		Email:     args.CreateByAdminArgs.Email,
 		Title:     args.CreateByAdminArgs.Title,
-		Birthdate: birthdate, 
+		Birthdate: birthdate,
 		IsAdmin:   args.CreateByAdminArgs.IsAdmin,
 		Password:  hashedPassword,
 		CreatedAt: time.Now(),
@@ -147,6 +148,100 @@ func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.E
 	if err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user); err != nil {
 		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
+
+	return util.GetSafeUser(user), fiber.Error{}
+}
+
+func UpdateByAdmin(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateByAdminArgs) (models.User, fiber.Error) {
+	user := models.User{}
+
+	validationError := validators.ValidateUpdateByAdminArgs(args)
+	if validationError != nil {
+		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
+	}
+
+	// Parse args.CreateByAdminArgs.Birthdate
+	birthdate, err := time.Parse("2006-01-02", args.CreateByAdminArgs.Birthdate)
+	if err != nil {
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	updateDoc := bson.D{
+		{Key: "name", Value: args.CreateByAdminArgs.Name},
+		{Key: "email", Value: args.CreateByAdminArgs.Email},
+		{Key: "title", Value: args.CreateByAdminArgs.Title},
+		{Key: "birthdate", Value: birthdate},
+	}
+
+	query := bson.D{{Key: "_id", Value: id}}
+	update := bson.D{
+		{Key: "$set", Value: updateDoc},
+	}
+
+	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
+	if err != nil {
+		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "email already in use"}
+		} else if err == mongo.ErrNoDocuments {
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+		}
+
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	// get updated data
+	user = models.User{}
+	dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
+
+	return util.GetSafeUser(user), fiber.Error{}
+}
+
+func Update(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateArgs) (models.User, fiber.Error) {
+	user := models.User{}
+
+	validationError := validators.ValidateUpdateArgs(args)
+	if validationError != nil {
+		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
+	}
+
+	hashedPassword, err := util.HashPassword(args.Password)
+	if err != nil {
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	// Parse args.CreateByAdminArgs.Birthdate
+	birthdate, err := time.Parse("2006-01-02", args.Birthdate)
+	if err != nil {
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	updateDoc := bson.D{
+		{Key: "name", Value: args.CreateByAdminArgs.Name},
+		{Key: "email", Value: args.CreateByAdminArgs.Email},
+		{Key: "title", Value: args.CreateByAdminArgs.Title},
+		{Key: "birthdate", Value: birthdate},
+		{Key: "password", Value: hashedPassword},
+	}
+
+	query := bson.D{{Key: "_id", Value: id}}
+	update := bson.D{
+		{Key: "$set", Value: updateDoc},
+	}
+
+	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
+	if err != nil {
+		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "email already in use"}
+		} else if err == mongo.ErrNoDocuments {
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+		}
+
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	// get updated data
+	user = models.User{}
+	dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
 
 	return util.GetSafeUser(user), fiber.Error{}
 }

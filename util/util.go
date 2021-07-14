@@ -90,6 +90,24 @@ func RetrieveCreateRequestData(c *fiber.Ctx, isAdmin bool) (interface{}, error) 
 	}
 }
 
+func RetrieveUpdateRequestData(c *fiber.Ctx, isAdmin bool) (primitive.ObjectID, interface{}, error) {
+	// Convert id parameter to objectId
+	id, err := ConvertStringIdIntoObjectId(c.Params("id"))
+	if err != nil {
+		return primitive.ObjectID{}, models.UpdateArgs{}, err
+	}
+
+	if isAdmin {
+		data := models.UpdateByAdminArgs{}
+		err := c.BodyParser(&data)
+		return id, data, err
+	} else {
+		data := models.CreateArgs{}
+		err := c.BodyParser(&data)
+		return id, data, err
+	}
+}
+
 func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {
 	token := ExtractToken(c)
 

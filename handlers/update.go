@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func CreateHandler(c *fiber.Ctx) error {
+func UpdateHandler(c *fiber.Ctx) error {
 	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
 
@@ -19,14 +19,14 @@ func CreateHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	userDetails, parsingError := util.RetrieveCreateRequestData(c, isAdmin)
-	if parsingError != nil {
-		return util.HandleParsingError(c, parsingError)
+	id, updateData, retrievalError := util.RetrieveUpdateRequestData(c, isAdmin)
+	if retrievalError != nil {
+		return util.HandleParsingError(c, retrievalError)
 	}
 
 	var res models.User
 	if isAdmin {
-		user, err := database.CreateByAdmin(dbClient, userDetails.(models.CreateByAdminArgs))
+		user, err := database.UpdateByAdmin(dbClient, id, updateData.(models.UpdateByAdminArgs))
 		if (fiber.Error{}) != err {
 			return c.Status(err.Code).JSON(fiber.Map{
 				"message": err.Error(),
@@ -35,7 +35,7 @@ func CreateHandler(c *fiber.Ctx) error {
 
 		res = user
 	} else {
-		user, err := database.Create(dbClient, userDetails.(models.CreateArgs))
+		user, err := database.Update(dbClient, id, updateData.(models.UpdateArgs))
 		if (fiber.Error{}) != err {
 			return c.Status(err.Code).JSON(fiber.Map{
 				"message": err.Error(),
