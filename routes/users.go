@@ -13,6 +13,7 @@ func UsersRoute(route fiber.Router) {
 	route.Get("/:id", middleware.RequireAuth, handlers.GetByIdHandler)
 	route.Delete("/:id", middleware.RequireAuth, handlers.DeleteHandler)
 	route.Put("/:id", middleware.RequireAuth, handlers.UpdateHandler)
+	route.Put("/password/reset/:id", middleware.RequireAuth, handlers.ResetPasswordHandler)
 	route.Post("/", middleware.RequireAuth, handlers.CreateHandler)
 	route.Post("/login", handlers.LoginHandler)
 }

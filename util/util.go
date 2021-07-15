@@ -122,6 +122,10 @@ func RetrieveGetByIdRequestData(c *fiber.Ctx) (primitive.ObjectID, error) {
 	return RetrieveDeleteRequestData(c)
 }
 
+func RetrieveResetPasswordRequestData(c *fiber.Ctx) (primitive.ObjectID, error) {
+	return RetrieveGetByIdRequestData(c)
+}
+
 func IsRequestFromSameUser(c *fiber.Ctx) (bool, fiber.Error) {
 	claims, err := security.ParseToken(ExtractToken(c))
 	if err != nil {
