@@ -141,3 +141,17 @@ func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {
 
 	return claims.IsAdmin, nil
 }
+
+func RetrieveIdFromToken(c *fiber.Ctx) (primitive.ObjectID, fiber.Error) {
+	claims, err := security.ParseToken(ExtractToken(c))
+	if err != nil {
+		return primitive.ObjectID{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	id, err := ConvertStringIdIntoObjectId(claims.Id)
+	if err != nil {
+		return primitive.ObjectID{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()} 
+	}
+
+	return id, fiber.Error{}
+}
