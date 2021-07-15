@@ -118,6 +118,19 @@ func RetrieveDeleteRequestData(c *fiber.Ctx) (primitive.ObjectID, error) {
 	return id, nil
 }
 
+func RetrieveGetByIdRequestData(c *fiber.Ctx) (primitive.ObjectID, error) {
+	return RetrieveDeleteRequestData(c)
+}
+
+func IsRequestFromSameUser(c *fiber.Ctx) (bool, fiber.Error) {
+	claims, err := security.ParseToken(ExtractToken(c))
+	if err != nil {
+		return false, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	return claims.Id == c.Params("id"), fiber.Error{}
+}
+
 func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {
 	token := ExtractToken(c)
 

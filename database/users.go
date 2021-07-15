@@ -269,7 +269,7 @@ func Delete(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
 func GetAll(dbClient *UsersClient) ([]models.User, fiber.Error) {
 	// Query to filter
 	query := bson.D{{}}
-	projection := options.Find().SetProjection(bson.E{ Key: "password", Value: 0 })
+	projection := options.Find().SetProjection(bson.E{Key: "password", Value: 0})
 
 	var users []models.User = make([]models.User, 0)
 	cursor, err := dbClient.Col.Find(dbClient.Ctx, query, projection)
@@ -283,4 +283,20 @@ func GetAll(dbClient *UsersClient) ([]models.User, fiber.Error) {
 	}
 
 	return users, fiber.Error{}
+}
+
+func GetById(dbClient *UsersClient, id primitive.ObjectID) (models.User, fiber.Error) {
+	user := models.User{}
+	query := bson.D{{Key: "_id", Value: id}}
+
+	err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return user, fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+		}
+
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	return util.GetSafeUser(user), fiber.Error{}
 }

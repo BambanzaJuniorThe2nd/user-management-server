@@ -12,6 +12,7 @@ func UsersRoute(route fiber.Router) {
 	// route.Get("/all", middleware.AuthRequired, controllers.GetAll)
 	// route.Get("/:id", middleware.AuthRequired, controllers.GetById)
 	// route.Post("/", middleware.AuthRequired, controllers.CreateByAdmin)
+	route.Get("/:id", middleware.RequireAuth, handlers.GetByIdHandler)
 	route.Get("/all", middleware.RequireAuth, handlers.GetAllHandler)
 	route.Delete("/:id", middleware.RequireAuth, handlers.DeleteHandler)
 	route.Put("/:id", middleware.RequireAuth, handlers.UpdateHandler)
