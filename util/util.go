@@ -150,7 +150,7 @@ func RetrieveIdFromToken(c *fiber.Ctx) (primitive.ObjectID, fiber.Error) {
 
 	id, err := ConvertStringIdIntoObjectId(claims.Id)
 	if err != nil {
-		return primitive.ObjectID{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()} 
+		return primitive.ObjectID{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
 
 	return id, fiber.Error{}
