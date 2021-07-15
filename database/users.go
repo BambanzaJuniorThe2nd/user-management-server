@@ -271,7 +271,7 @@ func GetAll(dbClient *UsersClient) ([]models.User, fiber.Error) {
 	fmt.Println("Inside GetAll...")
 	// Query to filter
 	query := bson.D{{}}
-	projection := options.Find().SetProjection(bson.E{Key: "password", Value: 0})
+	projection := options.Find().SetProjection(bson.D{{Key: "password", Value: 0}})
 
 	var users []models.User = make([]models.User, 0)
 	cursor, err := dbClient.Col.Find(dbClient.Ctx, query, projection)
