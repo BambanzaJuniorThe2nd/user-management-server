@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func UpdateHandler(c *fiber.Ctx) error {
+func GetAllHandler(c *fiber.Ctx) error {
 	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
 
@@ -19,30 +19,20 @@ func UpdateHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	id, updateData, retrievalError := util.RetrieveUpdateRequestData(c, isAdmin)
-	if retrievalError != nil {
-		return util.HandleParsingError(c, retrievalError)
-	}
-
-	var res models.User
+	var res []models.User
 	if isAdmin {
-		user, err := database.UpdateByAdmin(dbClient, id, updateData.(models.UpdateByAdminArgs))
+		users, err := database.GetAll(dbClient)
 		if (fiber.Error{}) != err {
 			return c.Status(err.Code).JSON(fiber.Map{
 				"message": err.Error(),
 			})
 		}
 
-		res = user
+		res = users
 	} else {
-		user, err := database.Update(dbClient, id, updateData.(models.UpdateArgs))
-		if (fiber.Error{}) != err {
-			return c.Status(err.Code).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-
-		res = user
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Not allowed to access other user resources",
+		})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(res)

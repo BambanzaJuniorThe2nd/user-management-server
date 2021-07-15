@@ -12,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UsersClient struct {
@@ -263,4 +264,23 @@ func Delete(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
 	}
 
 	return fiber.Error{}
+}
+
+func GetAll(dbClient *UsersClient) ([]models.User, fiber.Error) {
+	// Query to filter
+	query := bson.D{{}}
+	projection := options.Find().SetProjection(bson.E{ Key: "password", Value: 0 })
+
+	var users []models.User = make([]models.User, 0)
+	cursor, err := dbClient.Col.Find(dbClient.Ctx, query, projection)
+	if err != nil {
+		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	// iterate the cursor and decode each item into a User
+	if err = cursor.All(dbClient.Ctx, &users); err != nil {
+		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	return users, fiber.Error{}
 }
