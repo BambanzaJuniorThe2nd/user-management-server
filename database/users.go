@@ -248,3 +248,19 @@ func Update(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateArgs
 
 	return util.GetSafeUser(user), fiber.Error{}
 }
+
+func Delete(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
+	// find and delete todo
+	query := bson.D{{Key: "_id", Value: id}}
+
+	err := dbClient.Col.FindOneAndDelete(dbClient.Ctx, query).Err()
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+		}
+
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	return fiber.Error{}
+}

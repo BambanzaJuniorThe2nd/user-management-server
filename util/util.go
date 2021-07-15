@@ -108,6 +108,16 @@ func RetrieveUpdateRequestData(c *fiber.Ctx, isAdmin bool) (primitive.ObjectID, 
 	}
 }
 
+func RetrieveDeleteRequestData(c *fiber.Ctx) (primitive.ObjectID, error) {
+	// Convert id parameter to objectId
+	id, err := ConvertStringIdIntoObjectId(c.Params("id"))
+	if err != nil {
+		return primitive.ObjectID{}, err
+	}
+
+	return id, nil
+}
+
 func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {
 	token := ExtractToken(c)
 
