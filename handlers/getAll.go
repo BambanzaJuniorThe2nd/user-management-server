@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"server/database"
 	"server/models"
 	"server/util"
@@ -10,8 +9,6 @@ import (
 )
 
 func GetAllHandler(c *fiber.Ctx) error {
-	fmt.Println("Inside GetAllHandler...")
-	
 	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
 
