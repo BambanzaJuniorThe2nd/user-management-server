@@ -8,7 +8,7 @@ import (
 )
 
 
-func GetByToken(c *fiber.Ctx) error {
+func GetByTokenHandler(c *fiber.Ctx) error {
 	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
 

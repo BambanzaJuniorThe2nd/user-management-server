@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"fmt"
 	"server/models"
 	"server/security"
 	"strings"
@@ -138,6 +139,8 @@ func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+
+	fmt.Println("Returning claims: ", claims)
 
 	return claims.IsAdmin, nil
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func UsersRoute(route fiber.Router) {
-	route.Get("/me", middleware.RequireAuth, handlers.GetByToken)
+	route.Get("/me", middleware.RequireAuth, handlers.GetByTokenHandler)
 	route.Get("/:id", middleware.RequireAuth, handlers.GetByIdHandler)
 	route.Get("/all", middleware.RequireAuth, handlers.GetAllHandler)
 	route.Delete("/:id", middleware.RequireAuth, handlers.DeleteHandler)

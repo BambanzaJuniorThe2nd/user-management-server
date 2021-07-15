@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"server/models"
 	"server/security"
 	"server/util"
@@ -267,6 +268,7 @@ func Delete(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
 }
 
 func GetAll(dbClient *UsersClient) ([]models.User, fiber.Error) {
+	fmt.Println("Inside GetAll...")
 	// Query to filter
 	query := bson.D{{}}
 	projection := options.Find().SetProjection(bson.E{Key: "password", Value: 0})
@@ -274,11 +276,13 @@ func GetAll(dbClient *UsersClient) ([]models.User, fiber.Error) {
 	var users []models.User = make([]models.User, 0)
 	cursor, err := dbClient.Col.Find(dbClient.Ctx, query, projection)
 	if err != nil {
+		fmt.Println("Error occured finding all users")
 		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
 	}
 
 	// iterate the cursor and decode each item into a User
 	if err = cursor.All(dbClient.Ctx, &users); err != nil {
+		fmt.Println("Error occured decoding each user in users")
 		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
 	}
 
