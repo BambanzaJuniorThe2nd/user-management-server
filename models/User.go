@@ -20,13 +20,6 @@ type GetByTokenArgs struct {
 	Token string `json:"token,omitempty"`
 }
 
-// type CreateArgs struct {
-// 	Name      string
-// 	Email     string
-// 	Title     string
-// 	Birthdate string
-// }
-
 type CreateByAdminArgs struct {
 	Name      string
 	Email     string
@@ -60,4 +53,8 @@ type LoginResult struct {
 
 type ChangePasswordArgs struct {
 	Password string
+}
+
+type CreateDefaultAdminArgs struct {
+	CreateArgs
 }

@@ -360,3 +360,55 @@ func ChangePassword(dbClient *UsersClient, id primitive.ObjectID, args models.Ch
 
 	return fiber.Error{}
 }
+
+func CreateDefaultAdmin(dbClient *UsersClient, args models.CreateDefaultAdminArgs) (fiber.Error) {
+	user := models.User{}
+
+	validationError := validators.ValidateCreateDefaultAdminArgs(args)
+	if validationError != nil {
+		return fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
+	}
+
+	hashedPassword, err := util.HashPassword(args.Password)
+	if err != nil {
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	// Parse args.CreateByAdminArgs.Birthdate
+	birthdate, err := time.Parse("2006-01-02", args.Birthdate)
+	if err != nil {
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	// Create a User object
+	// mostly from args
+	user = models.User{
+		Name:      args.Name,
+		Email:     args.Email,
+		Title:     args.Title,
+		Birthdate: birthdate,
+		IsAdmin:   args.IsAdmin,
+		Password:  hashedPassword,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
+	if err != nil {
+		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
+			return fiber.Error{Code: fiber.StatusInternalServerError, Message: "email already in use"}
+		}
+
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	// get the inserted user
+	user = models.User{}
+	query := bson.D{{Key: "_id", Value: result.InsertedID}}
+
+	if err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user); err != nil {
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	return fiber.Error{}
+}
