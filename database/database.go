@@ -79,7 +79,7 @@ func createDefaultAdmin(usersClient *UsersClient) error {
 			CreateArgs: models.CreateArgs{
 				CreateByAdminArgs: models.CreateByAdminArgs{
 					Name:      "John Doe",
-					Email:     "admin@admin.com",
+					Email:     "admin@gmail.com",
 					Title:     "Default Admin",
 					Birthdate: "1970-01-01",
 					IsAdmin:   true,
