@@ -7,9 +7,8 @@ services:
     ports:
       - "27017:27017"
     environment:
-      MONGO_URI: "mongodb://localhost:27017/usermanagement"
-      DB: "users"
-      APP_ENV: "development"
+      MONGO_URI: mongodb://mongo:27017
+      - MONGO_INITDB_DATABASE=Mgo
     networks:
       - usr-mgt-net
     volumes:
@@ -21,8 +20,8 @@ services:
       - "3000:3000"
     environment:
       PORT: 3000
-      DB: "users"
-      MONGO_URI: "mongodb://localhost:27017/usermanagement"
+      DB: "usermanagement"
+      MONGO_URI: mongodb://mongo:27017
       APP_ENV: "development"
       JWT_SECRET_KEY: "secret"
     networks:

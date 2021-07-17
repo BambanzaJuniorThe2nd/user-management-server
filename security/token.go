@@ -3,15 +3,20 @@ package security
 import (
 	"errors"
 	"fmt"
-	"os"
 	"server/models"
 	"time"
+	"server/config"
 
 	jwt "github.com/form3tech-oss/jwt-go"
 )
 
+// var (
+// 	JwtSecretKey     = []byte(os.Getenv("JWT_SECRET_KEY"))
+// 	JwtSigningMethod = jwt.SigningMethodHS256.Name
+// )
+
 var (
-	JwtSecretKey     = []byte(os.Getenv("JWT_SECRET_KEY"))
+	JwtSecretKey     = config.GetConfig().Token
 	JwtSigningMethod = jwt.SigningMethodHS256.Name
 )
 

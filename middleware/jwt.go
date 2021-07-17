@@ -1,12 +1,12 @@
 package middleware
 
 import (
-    "github.com/gofiber/fiber/v2"
-    "server/security"
-    "net/http"
-    "server/util"
+	"github.com/gofiber/fiber/v2"
+	"net/http"
+	"server/security"
+	"server/util"
 
-    jwtware "github.com/gofiber/jwt/v2"
+	jwtware "github.com/gofiber/jwt/v2"
 )
 
 func RequireAuth(ctx *fiber.Ctx) error {
