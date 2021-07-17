@@ -10,13 +10,8 @@ import (
 	jwt "github.com/form3tech-oss/jwt-go"
 )
 
-// var (
-// 	JwtSecretKey     = []byte(os.Getenv("JWT_SECRET_KEY"))
-// 	JwtSigningMethod = jwt.SigningMethodHS256.Name
-// )
-
 var (
-	JwtSecretKey     = config.GetConfig().Token
+	JwtSecretKey     = []byte(config.GetConfig().Token)
 	JwtSigningMethod = jwt.SigningMethodHS256.Name
 )
 
