@@ -57,3 +57,7 @@ type LoginResult struct {
 	Token string `json:"token"`
 	User  User   `json:"user"`
 }
+
+type ChangePasswordArgs struct {
+	Password string
+}

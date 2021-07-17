@@ -300,8 +300,41 @@ func GetById(dbClient *UsersClient, id primitive.ObjectID) (models.User, fiber.E
 	return util.GetSafeUser(user), fiber.Error{}
 }
 
-func ResetUserPassword(dbClient *UsersClient, id primitive.ObjectID) (fiber.Error) {
+func ResetUserPassword(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
 	hashedPassword, err := util.HashPassword(DEFAULT_PASSWORD)
+	if err != nil {
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
+	}
+
+	updateDoc := bson.D{
+		{Key: "password", Value: hashedPassword},
+		{Key: "updatedAt", Value: time.Now()},
+	}
+
+	query := bson.D{{Key: "_id", Value: id}}
+	update := bson.D{
+		{Key: "$set", Value: updateDoc},
+	}
+
+	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+		}
+
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+	}
+
+	return fiber.Error{}
+}
+
+func ChangePassword(dbClient *UsersClient, id primitive.ObjectID, args models.ChangePasswordArgs) fiber.Error {
+	validationError := validators.ValidateChangePasswordArgs(args)
+	if validationError != nil {
+		return fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
+	}
+
+	hashedPassword, err := util.HashPassword(args.Password)
 	if err != nil {
 		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}

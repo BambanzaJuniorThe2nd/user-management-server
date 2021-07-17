@@ -14,6 +14,7 @@ func UsersRoute(route fiber.Router) {
 	route.Delete("/:id", middleware.RequireAuth, handlers.DeleteHandler)
 	route.Put("/:id", middleware.RequireAuth, handlers.UpdateHandler)
 	route.Put("/password/reset/:id", middleware.RequireAuth, handlers.ResetPasswordHandler)
+	route.Put("/password/change/:id", middleware.RequireAuth, handlers.ChangePasswordHandler)
 	route.Post("/", middleware.RequireAuth, handlers.CreateHandler)
 	route.Post("/login", handlers.LoginHandler)
 }

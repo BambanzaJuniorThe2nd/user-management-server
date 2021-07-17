@@ -135,6 +135,21 @@ func IsRequestFromSameUser(c *fiber.Ctx) (bool, fiber.Error) {
 	return claims.Id == c.Params("id"), fiber.Error{}
 }
 
+func RetrieveChangePasswordRequestData(c *fiber.Ctx) (primitive.ObjectID, models.ChangePasswordArgs, fiber.Error) {
+	args := models.ChangePasswordArgs{}
+	id, err := ConvertStringIdIntoObjectId(c.Params("id"))
+	if err != nil {
+		return primitive.ObjectID{}, args, fiber.Error{Code: fiber.StatusBadRequest, Message: err.Error() }
+	}
+
+	err2 := c.BodyParser(&args)
+	if err2 != nil {
+		return id, args, fiber.Error{Code: fiber.StatusBadRequest, Message: err.Error() }
+	}
+
+	return id, args, fiber.Error{}
+}
+
 func IsRequestFromAdmin(c *fiber.Ctx) (bool, error) {
 	token := ExtractToken(c)
 

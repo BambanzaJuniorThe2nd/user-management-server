@@ -120,3 +120,19 @@ func ValidateUpdateByAdminArgs(args models.UpdateByAdminArgs) error {
 
 	return util.ParseValidationError(err)
 }
+
+func ValidateChangePasswordArgs(args models.ChangePasswordArgs) error {
+	err := validation.ValidateStruct(&args,
+		// Password cannot be empty
+		validation.Field(
+			&args.Password,
+			validation.Required.Error("password is required"),
+			validation.Match(regexp.MustCompile("[0-9]")).Error("password must contain at least one digit"),
+			validation.Match(regexp.MustCompile("[a-z]")).Error("password must contain at least one lowercase letter"),
+			validation.Match(regexp.MustCompile("[A-Z]")).Error("password must contain at least one uppercase letter"),
+			validation.Match(regexp.MustCompile("[#?!@$%^&*-]")).Error("password must contain at least one special character"),
+			validation.Match(regexp.MustCompile("[a-zA-Z0-9#?!@$%^&*-]{8,}$")).Error("password must have at least 8 characters")),
+	)
+
+	return util.ParseValidationError(err)
+}
