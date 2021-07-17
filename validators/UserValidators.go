@@ -148,7 +148,7 @@ func ValidateCreateDefaultAdminArgs(args models.CreateDefaultAdminArgs) error {
 		// Birthdate cannot be empty, and must be a date string of the format "YYYY-MM-DD"
 		validation.Field(&args.Birthdate, validation.Required.Error("birthdate is required"), validation.Date("2006-01-02").Error("Invalid date for birthdate. Format: YYYY-MM-DD")),
 		// IsAdmin must be set to false
-		validation.Field(&args.IsAdmin, validation.In(false).Error("isAdmin can only be set to false")),
+		validation.Field(&args.IsAdmin),
 		// Password cannot be empty
 		validation.Field(
 			&args.Password,
