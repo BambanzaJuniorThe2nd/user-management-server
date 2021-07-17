@@ -75,18 +75,20 @@ func createDefaultAdmin(usersClient *UsersClient) error {
 
 	if len(users) == 0 {
 		fmt.Println("Creating default admin")
-		user := models.CreateArgs{
-			CreateByAdminArgs: models.CreateByAdminArgs{
-				Name:      "John Doe",
-				Email:     "admin@gmail.com",
-				Title:     "Administrator",
-				Birthdate: "1970-01-01",
-				IsAdmin:   true,
+		user := models.CreateDefaultAdminArgs{
+			CreateArgs: models.CreateArgs{
+				CreateByAdminArgs: models.CreateByAdminArgs{
+					Name:      "John Doe",
+					Email:     "admin@admin.com",
+					Title:     "Default Admin",
+					Birthdate: "1970-01-01",
+					IsAdmin:   true,
+				},
+				Password:          "defaultPassword1!",
 			},
-			Password:          "defaultPassword1!",
 		}
 
-		_, err := Create(usersClient, user)
+		err := CreateDefaultAdmin(usersClient, user)
 		if (fiber.Error{}) != err {
 			return errors.New(err.Error())
 		}
