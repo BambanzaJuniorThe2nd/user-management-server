@@ -140,3 +140,9 @@ func RetrieveIdFromToken(c *fiber.Ctx) (primitive.ObjectID, fiber.Error) {
 
 	return id, fiber.Error{}
 }
+
+func HandleParsingError(c *fiber.Ctx, parsingError error) error{
+	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		"message": parsingError.Error(),
+	})
+}
