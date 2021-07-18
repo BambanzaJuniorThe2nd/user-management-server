@@ -105,58 +105,6 @@ func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models
 	return GetSafeUser(user), fiber.Error{}
 }
 
-func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.Error) {
-	user := models.User{}
-
-	validationError := validators.ValidateCreateArgs(args)
-	if validationError != nil {
-		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
-	}
-
-	hashedPassword, err := util.HashPassword(args.Password)
-	if err != nil {
-		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
-	}
-
-	// Parse args.CreateByAdminArgs.Birthdate
-	birthdate, err := time.Parse(DATE_FORMAT, args.CreateByAdminArgs.Birthdate)
-	if err != nil {
-		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
-	}
-
-	// Create a User object
-	// mostly from args
-	user = models.User{
-		Name:      args.CreateByAdminArgs.Name,
-		Email:     args.CreateByAdminArgs.Email,
-		Title:     args.CreateByAdminArgs.Title,
-		Birthdate: birthdate,
-		IsAdmin:   args.CreateByAdminArgs.IsAdmin,
-		Password:  hashedPassword,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
-	if err != nil {
-		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
-			return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_EMAIL_ALREADY_IN_USE}
-		}
-
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
-	}
-
-	// get the inserted user
-	user = models.User{}
-	query := bson.D{{Key: "_id", Value: result.InsertedID}}
-
-	if err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user); err != nil {
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
-	}
-
-	return GetSafeUser(user), fiber.Error{}
-}
-
 func UpdateByAdmin(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateByAdminArgs) (models.User, fiber.Error) {
 	user := models.User{}
 

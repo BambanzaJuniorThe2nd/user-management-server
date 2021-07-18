@@ -17,25 +17,6 @@ func ValidateLoginArgs(args models.LoginArgs) error {
 	return ParseValidationError(err)
 }
 
-func ValidateCreateArgs(args models.CreateArgs) error {
-	err := validation.ValidateStruct(&args,
-		// Name cannot be empty
-		validation.Field(&args.CreateByAdminArgs.Name, nameValidationRules...),
-		// Email cannot be empty, and must be a valid email
-		validation.Field(&args.CreateByAdminArgs.Email, emailValidationRules...),
-		// Title cannot be empty
-		validation.Field(&args.CreateByAdminArgs.Title, titleValidationRules...),
-		// Birthdate cannot be empty, and must be a date string of the format "YYYY-MM-DD"
-		validation.Field(&args.CreateByAdminArgs.Birthdate, birthdateValidationRules...),
-		// IsAdmin must be set to false
-		validation.Field(&args.CreateByAdminArgs.IsAdmin, isAdminValidationRules...),
-		// Password cannot be empty
-		validation.Field(&args.Password, passwordValidationRules...),
-	)
-
-	return ParseValidationError(err)
-}
-
 func ValidateCreateByAdminArgs(args models.CreateByAdminArgs) error {
 	err := validation.ValidateStruct(&args,
 		// Name cannot be empty

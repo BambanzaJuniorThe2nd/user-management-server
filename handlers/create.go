@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"server/database"
-	"server/models"
 	"server/util"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,26 +23,18 @@ func CreateHandler(c *fiber.Ctx) error {
 		return util.HandleParsingError(c, parsingError)
 	}
 
-	var res models.User
 	if isAdmin {
-		user, err := database.CreateByAdmin(dbClient, userDetails.(models.CreateByAdminArgs))
+		user, err := database.CreateByAdmin(dbClient, userDetails)
 		if (fiber.Error{}) != err {
 			return c.Status(err.Code).JSON(fiber.Map{
 				"message": err.Error(),
 			})
 		}
 
-		res = user
+		return c.Status(fiber.StatusCreated).JSON(user)
 	} else {
-		user, err := database.Create(dbClient, userDetails.(models.CreateArgs))
-		if (fiber.Error{}) != err {
-			return c.Status(err.Code).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-
-		res = user
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
+		})
 	}
-
-	return c.Status(fiber.StatusCreated).JSON(res)
 }
