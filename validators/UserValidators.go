@@ -178,7 +178,7 @@ func ValidateUpdateByAdminArgs(args models.UpdateByAdminArgs) error {
 		// Title cannot be empty
 		validation.Field(&args.Title, titleValidationRules...),
 		// Birthdate cannot be empty, and must be a date string of the format "YYYY-MM-DD"
-		validation.Field(&args.Birthdate, titleValidationRules...),
+		validation.Field(&args.Birthdate, birthdateValidationRules...),
 		// IsAdmin cannot be empty
 		validation.Field(&args.IsAdmin),
 	)
