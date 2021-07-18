@@ -29,7 +29,7 @@ func GetAllHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(users)
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Access limited to admins only",
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
 		})
 	}
 }
