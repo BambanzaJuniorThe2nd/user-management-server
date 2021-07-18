@@ -151,57 +151,6 @@ func UpdateByAdmin(dbClient *UsersClient, id primitive.ObjectID, args models.Upd
 	return GetSafeUser(user), fiber.Error{}
 }
 
-func Update(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateArgs) (models.User, fiber.Error) {
-	user := models.User{}
-
-	validationError := validators.ValidateUpdateArgs(args)
-	if validationError != nil {
-		return user, fiber.Error{Code: fiber.StatusBadRequest, Message: validationError.Error()}
-	}
-
-	hashedPassword, err := util.HashPassword(args.Password)
-	if err != nil {
-		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
-	}
-
-	// Parse args.CreateByAdminArgs.Birthdate
-	birthdate, err := time.Parse(DATE_FORMAT, args.Birthdate)
-	if err != nil {
-		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
-	}
-
-	updateDoc := bson.D{
-		{Key: "name", Value: args.CreateByAdminArgs.Name},
-		{Key: "email", Value: args.CreateByAdminArgs.Email},
-		{Key: "title", Value: args.CreateByAdminArgs.Title},
-		{Key: "birthdate", Value: birthdate},
-		{Key: "password", Value: hashedPassword},
-		{Key: "updatedAt", Value: time.Now()},
-	}
-
-	query := bson.D{{Key: "_id", Value: id}}
-	update := bson.D{
-		{Key: "$set", Value: updateDoc},
-	}
-
-	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
-	if err != nil {
-		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
-			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_EMAIL_ALREADY_IN_USE}
-		} else if err == mongo.ErrNoDocuments {
-			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_USER_NOT_FOUND}
-		}
-
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
-	}
-
-	// get updated data
-	user = models.User{}
-	dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
-
-	return GetSafeUser(user), fiber.Error{}
-}
-
 func Delete(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
 	// find and delete todo
 	query := bson.D{{Key: "_id", Value: id}}

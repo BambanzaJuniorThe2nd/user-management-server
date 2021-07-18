@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"server/database"
-	"server/models"
 	"server/util"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,31 +18,24 @@ func UpdateHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	id, updateData, retrievalError := util.RetrieveUpdateRequestData(c, isAdmin)
+	id, updateData, retrievalError := util.RetrieveUpdateRequestData(c)
 	if retrievalError != nil {
 		return util.HandleParsingError(c, retrievalError)
 	}
 
-	var res models.User
 	if isAdmin {
-		user, err := database.UpdateByAdmin(dbClient, id, updateData.(models.UpdateByAdminArgs))
+		user, err := database.UpdateByAdmin(dbClient, id, updateData)
 		if (fiber.Error{}) != err {
 			return c.Status(err.Code).JSON(fiber.Map{
 				"message": err.Error(),
 			})
 		}
 
-		res = user
+		return c.Status(fiber.StatusOK).JSON(user)
 	} else {
-		user, err := database.Update(dbClient, id, updateData.(models.UpdateArgs))
-		if (fiber.Error{}) != err {
-			return c.Status(err.Code).JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
-
-		res = user
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
+		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
 }

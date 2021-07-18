@@ -56,28 +56,22 @@ func RetrieveLoginRequestData(c *fiber.Ctx) (models.LoginArgs, error) {
 	return creds, err
 }
 
-func RetrieveCreateRequestData(c *fiber.Ctx, isAdmin bool) (models.CreateByAdminArgs, error) {
+func RetrieveCreateRequestData(c *fiber.Ctx) (models.CreateByAdminArgs, error) {
 	data := models.CreateByAdminArgs{}
 	err := c.BodyParser(&data)
 	return data, err
 }
 
-func RetrieveUpdateRequestData(c *fiber.Ctx, isAdmin bool) (primitive.ObjectID, interface{}, error) {
+func RetrieveUpdateRequestData(c *fiber.Ctx) (primitive.ObjectID, models.UpdateByAdminArgs, error) {
 	// Convert id parameter to objectId
 	id, err := ConvertStringIdIntoObjectId(c.Params("id"))
 	if err != nil {
-		return primitive.ObjectID{}, models.UpdateArgs{}, err
+		return primitive.ObjectID{}, models.UpdateByAdminArgs{}, err
 	}
 
-	if isAdmin {
-		data := models.UpdateByAdminArgs{}
-		err := c.BodyParser(&data)
-		return id, data, err
-	} else {
-		data := models.UpdateArgs{}
-		err := c.BodyParser(&data)
-		return id, data, err
-	}
+	data := models.UpdateByAdminArgs{}
+	err = c.BodyParser(&data)
+	return id, data, err
 }
 
 func RetrieveDeleteRequestData(c *fiber.Ctx) (primitive.ObjectID, error) {

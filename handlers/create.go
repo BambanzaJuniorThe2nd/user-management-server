@@ -18,7 +18,7 @@ func CreateHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	userDetails, parsingError := util.RetrieveCreateRequestData(c, isAdmin)
+	userDetails, parsingError := util.RetrieveCreateRequestData(c)
 	if parsingError != nil {
 		return util.HandleParsingError(c, parsingError)
 	}
