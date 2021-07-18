@@ -7,14 +7,14 @@ services:
     ports:
       - "27017:27017"
     environment:
-      MONGO_URI: mongodb://mongo:27017
-      - MONGO_INITDB_DATABASE=Mgo
+      - MONGO_INITDB_DATABASE=usermanagement
     networks:
       - usr-mgt-net
     volumes:
       - mongo-data:/data/db
   app:
     container_name: usr_mgt_api
+    restart: on-failure
     build: .
     ports:
       - "3000:3000"
