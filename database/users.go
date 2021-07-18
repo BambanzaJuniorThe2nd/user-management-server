@@ -36,20 +36,20 @@ func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fi
 
 	err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
 	if (err != nil) || (user.Password != "" && !util.CheckPasswordHash(args.Password, user.Password)) {
-		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: "Login failed"}
+		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: ERROR_MESSAGE_LOGIN_FAILED}
 	}
 
 	token, tokenError := security.NewToken(&user)
 	if tokenError != nil {
-		return result, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return result, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	if !user.IsAdmin {
-		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: "Access limited to admins only"}
+		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: ERROR_MESSAGE_ACCESS_RESTRICTED}
 	}
 
 	result.Token = token
-	result.User = util.GetSafeUser(user)
+	result.User = GetSafeUser(user)
 	return result, fiber.Error{}
 }
 
@@ -67,7 +67,7 @@ func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models
 	}
 
 	// Parse args.CreateByAdminArgs.Birthdate
-	birthdate, err := time.Parse("2006-01-02", args.Birthdate)
+	birthdate, err := time.Parse(DATE_FORMAT, args.Birthdate)
 	if err != nil {
 		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
@@ -88,10 +88,10 @@ func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models
 	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
 	if err != nil {
 		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
-			return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "email already in use"}
+			return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_EMAIL_ALREADY_IN_USE}
 		}
 
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	// get the inserted user
@@ -102,7 +102,7 @@ func CreateByAdmin(dbClient *UsersClient, args models.CreateByAdminArgs) (models
 		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
 
-	return util.GetSafeUser(user), fiber.Error{}
+	return GetSafeUser(user), fiber.Error{}
 }
 
 func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.Error) {
@@ -119,7 +119,7 @@ func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.E
 	}
 
 	// Parse args.CreateByAdminArgs.Birthdate
-	birthdate, err := time.Parse("2006-01-02", args.CreateByAdminArgs.Birthdate)
+	birthdate, err := time.Parse(DATE_FORMAT, args.CreateByAdminArgs.Birthdate)
 	if err != nil {
 		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
@@ -140,10 +140,10 @@ func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.E
 	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
 	if err != nil {
 		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
-			return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "email already in use"}
+			return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_EMAIL_ALREADY_IN_USE}
 		}
 
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	// get the inserted user
@@ -154,7 +154,7 @@ func Create(dbClient *UsersClient, args models.CreateArgs) (models.User, fiber.E
 		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
 
-	return util.GetSafeUser(user), fiber.Error{}
+	return GetSafeUser(user), fiber.Error{}
 }
 
 func UpdateByAdmin(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateByAdminArgs) (models.User, fiber.Error) {
@@ -166,7 +166,7 @@ func UpdateByAdmin(dbClient *UsersClient, id primitive.ObjectID, args models.Upd
 	}
 
 	// Parse args.CreateByAdminArgs.Birthdate
-	birthdate, err := time.Parse("2006-01-02", args.CreateByAdminArgs.Birthdate)
+	birthdate, err := time.Parse(DATE_FORMAT, args.CreateByAdminArgs.Birthdate)
 	if err != nil {
 		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
@@ -188,19 +188,19 @@ func UpdateByAdmin(dbClient *UsersClient, id primitive.ObjectID, args models.Upd
 	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
 	if err != nil {
 		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
-			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "email already in use"}
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_EMAIL_ALREADY_IN_USE}
 		} else if err == mongo.ErrNoDocuments {
-			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_USER_NOT_FOUND}
 		}
 
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	// get updated data
 	user = models.User{}
 	dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
 
-	return util.GetSafeUser(user), fiber.Error{}
+	return GetSafeUser(user), fiber.Error{}
 }
 
 func Update(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateArgs) (models.User, fiber.Error) {
@@ -217,7 +217,7 @@ func Update(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateArgs
 	}
 
 	// Parse args.CreateByAdminArgs.Birthdate
-	birthdate, err := time.Parse("2006-01-02", args.Birthdate)
+	birthdate, err := time.Parse(DATE_FORMAT, args.Birthdate)
 	if err != nil {
 		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
@@ -239,19 +239,19 @@ func Update(dbClient *UsersClient, id primitive.ObjectID, args models.UpdateArgs
 	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
 	if err != nil {
 		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
-			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "email already in use"}
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_EMAIL_ALREADY_IN_USE}
 		} else if err == mongo.ErrNoDocuments {
-			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+			return models.User{}, fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_USER_NOT_FOUND}
 		}
 
-		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return models.User{}, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	// get updated data
 	user = models.User{}
 	dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
 
-	return util.GetSafeUser(user), fiber.Error{}
+	return GetSafeUser(user), fiber.Error{}
 }
 
 func Delete(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
@@ -261,10 +261,10 @@ func Delete(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
 	err := dbClient.Col.FindOneAndDelete(dbClient.Ctx, query).Err()
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+			return fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_USER_NOT_FOUND}
 		}
 
-		return fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	return fiber.Error{}
@@ -277,12 +277,12 @@ func GetAll(dbClient *UsersClient) ([]models.User, fiber.Error) {
 	var users []models.User = make([]models.User, 0)
 	cursor, err := dbClient.Col.Find(dbClient.Ctx, query, projection)
 	if err != nil {
-		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	// iterate the cursor and decode each item into a User
 	if err = cursor.All(dbClient.Ctx, &users); err != nil {
-		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return users, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	return users, fiber.Error{}
@@ -295,13 +295,13 @@ func GetById(dbClient *UsersClient, id primitive.ObjectID) (models.User, fiber.E
 	err := dbClient.Col.FindOne(dbClient.Ctx, query).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return user, fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+			return user, fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_USER_NOT_FOUND}
 		}
 
-		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return user, fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
-	return util.GetSafeUser(user), fiber.Error{}
+	return GetSafeUser(user), fiber.Error{}
 }
 
 func ResetUserPassword(dbClient *UsersClient, id primitive.ObjectID) fiber.Error {
@@ -323,10 +323,10 @@ func ResetUserPassword(dbClient *UsersClient, id primitive.ObjectID) fiber.Error
 	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+			return fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_USER_NOT_FOUND}
 		}
 
-		return fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	return fiber.Error{}
@@ -356,10 +356,10 @@ func ChangePassword(dbClient *UsersClient, id primitive.ObjectID, args models.Ch
 	err = dbClient.Col.FindOneAndUpdate(dbClient.Ctx, query, update).Err()
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return fiber.Error{Code: fiber.StatusNotFound, Message: "User not found"}
+			return fiber.Error{Code: fiber.StatusNotFound, Message: ERROR_MESSAGE_USER_NOT_FOUND}
 		}
 
-		return fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	return fiber.Error{}
@@ -379,7 +379,7 @@ func CreateDefaultAdmin(dbClient *UsersClient, args models.CreateDefaultAdminArg
 	}
 
 	// Parse args.CreateByAdminArgs.Birthdate
-	birthdate, err := time.Parse("2006-01-02", args.Birthdate)
+	birthdate, err := time.Parse(DATE_FORMAT, args.Birthdate)
 	if err != nil {
 		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
@@ -400,10 +400,10 @@ func CreateDefaultAdmin(dbClient *UsersClient, args models.CreateDefaultAdminArg
 	result, err := dbClient.Col.InsertOne(dbClient.Ctx, user)
 	if err != nil {
 		if err.(mongo.WriteException).WriteErrors[0].Code == 11000 {
-			return fiber.Error{Code: fiber.StatusInternalServerError, Message: "email already in use"}
+			return fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_EMAIL_ALREADY_IN_USE}
 		}
 
-		return fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
+		return fiber.Error{Code: fiber.StatusInternalServerError, Message: ERROR_MESSAGE_SOMETHING_WENT_WRONG}
 	}
 
 	// get the inserted user

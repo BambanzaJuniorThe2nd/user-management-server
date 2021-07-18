@@ -32,19 +32,6 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func GetSafeUser(user models.User) models.User {
-	return models.User{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		Title:     user.Title,
-		Birthdate: user.Birthdate,
-		IsAdmin:   user.IsAdmin,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}
-}
-
 func ExtractToken(c *fiber.Ctx) string {
 	bearToken := c.Get("Authorization")
 

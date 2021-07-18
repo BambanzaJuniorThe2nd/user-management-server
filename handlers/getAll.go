@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"server/database"
-	"server/models"
 	"server/util"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +18,6 @@ func GetAllHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	var res []models.User
 	if isAdmin {
 		users, err := database.GetAll(dbClient)
 		if (fiber.Error{}) != err {
@@ -28,12 +26,10 @@ func GetAllHandler(c *fiber.Ctx) error {
 			})
 		}
 
-		res = users
+		return c.Status(fiber.StatusOK).JSON(users)
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Not allowed to access other user resources",
+			"message": "Access limited to admins only",
 		})
 	}
-
-	return c.Status(fiber.StatusOK).JSON(res)
 }
