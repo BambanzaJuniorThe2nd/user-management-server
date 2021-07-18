@@ -28,17 +28,8 @@ type CreateByAdminArgs struct {
 	IsAdmin   bool
 }
 
-type CreateArgs struct {
-	CreateByAdminArgs
-	Password string
-}
-
 type UpdateByAdminArgs struct {
 	CreateByAdminArgs
-}
-
-type UpdateArgs struct {
-	CreateArgs
 }
 
 type LoginArgs struct {
@@ -51,10 +42,11 @@ type LoginResult struct {
 	User  User   `json:"user"`
 }
 
-type ChangePasswordArgs struct {
+type CreateDefaultAdminArgs struct {
 	Password string
+	CreateByAdminArgs
 }
 
-type CreateDefaultAdminArgs struct {
-	CreateArgs
+type ChangePasswordArgs struct {
+	Password string
 }

@@ -275,7 +275,7 @@ func CreateDefaultAdmin(dbClient *UsersClient, args models.CreateDefaultAdminArg
 		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
 	}
 
-	// Parse args.CreateByAdminArgs.Birthdate
+	// Parse args.Birthdate
 	birthdate, err := time.Parse(DATE_FORMAT, args.Birthdate)
 	if err != nil {
 		return fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}

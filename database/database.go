@@ -76,15 +76,13 @@ func createDefaultAdmin(usersClient *UsersClient) error {
 	if len(users) == 0 {
 		fmt.Println("Creating default admin")
 		user := models.CreateDefaultAdminArgs{
-			CreateArgs: models.CreateArgs{
-				CreateByAdminArgs: models.CreateByAdminArgs{
-					Name:      "John Doe",
-					Email:     "admin@gmail.com",
-					Title:     "Default Admin",
-					Birthdate: "1970-01-01",
-					IsAdmin:   true,
-				},
-				Password:          "defaultPassword1!",
+			Password:          "defaultPassword1!",
+			CreateByAdminArgs: models.CreateByAdminArgs{
+				Name:      "John Doe",
+				Email:     "admin@gmail.com",
+				Title:     "Default Admin",
+				Birthdate: "1970-01-01",
+				IsAdmin:   true,
 			},
 		}
 
