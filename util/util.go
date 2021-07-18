@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"server/models"
 	"server/security"
 	"strings"
@@ -59,14 +58,6 @@ func ExtractToken(c *fiber.Ctx) string {
 
 func ConvertStringIdIntoObjectId(id string) (primitive.ObjectID, error) {
 	return primitive.ObjectIDFromHex(id)
-}
-
-func ParseValidationError(err error) error {
-	if err != nil {
-		errorList := strings.Split(err.Error(), ";")
-		return errors.New(errorList[0])
-	}
-	return nil
 }
 
 func RetrieveLoginRequestData(c *fiber.Ctx) (models.LoginArgs, error) {
@@ -139,12 +130,12 @@ func RetrieveChangePasswordRequestData(c *fiber.Ctx) (primitive.ObjectID, models
 	args := models.ChangePasswordArgs{}
 	id, err := ConvertStringIdIntoObjectId(c.Params("id"))
 	if err != nil {
-		return primitive.ObjectID{}, args, fiber.Error{Code: fiber.StatusBadRequest, Message: err.Error() }
+		return primitive.ObjectID{}, args, fiber.Error{Code: fiber.StatusBadRequest, Message: err.Error()}
 	}
 
 	err2 := c.BodyParser(&args)
 	if err2 != nil {
-		return id, args, fiber.Error{Code: fiber.StatusBadRequest, Message: err.Error() }
+		return id, args, fiber.Error{Code: fiber.StatusBadRequest, Message: err.Error()}
 	}
 
 	return id, args, fiber.Error{}

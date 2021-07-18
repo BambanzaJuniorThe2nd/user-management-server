@@ -1,4 +1,4 @@
-environment: prod
+environment: dev
 port: 3000
 token: secret
 mongo:
