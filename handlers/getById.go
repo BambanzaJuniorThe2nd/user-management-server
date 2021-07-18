@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-
 func GetByIdHandler(c *fiber.Ctx) error {
 	// Access dbClient
 	dbClient := c.Locals("dbClient").(*database.UsersClient)
@@ -17,21 +16,14 @@ func GetByIdHandler(c *fiber.Ctx) error {
 		return util.HandleParsingError(c, retrievalError)
 	}
 
-	isSameUser, err := util.IsRequestFromSameUser(c)
-	if (fiber.Error{}) != err {
-		return c.Status(err.Code).JSON(fiber.Map{
+	isAdmin, err := util.IsRequestFromAdmin(c)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	isAdmin, err2 := util.IsRequestFromAdmin(c)
-	if err2 != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err2.Error(),
-		})
-	}
-
-	if isSameUser || isAdmin {
+	if isAdmin {
 		user, err := database.GetById(dbClient, id)
 		if (fiber.Error{}) != err {
 			return c.Status(err.Code).JSON(fiber.Map{
@@ -42,7 +34,7 @@ func GetByIdHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(user)
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Not allowed to access other user resources",
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
 		})
 	}
 }

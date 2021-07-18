@@ -18,14 +18,14 @@ func ChangePasswordHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	isSameUser, err := util.IsRequestFromSameUser(c)
-	if (fiber.Error{}) != err {
-		return c.Status(err.Code).JSON(fiber.Map{
+	isAdmin, err2 := util.IsRequestFromAdmin(c)
+	if err2 != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	if isSameUser {
+	if isAdmin {
 		err = database.ChangePassword(dbClient, id, args)
 		if (fiber.Error{}) != err {
 			return c.Status(err.Code).JSON(fiber.Map{
@@ -36,7 +36,7 @@ func ChangePasswordHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusOK)
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Not authorized to change other users' passwords",
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
 		})
 	}
 }
