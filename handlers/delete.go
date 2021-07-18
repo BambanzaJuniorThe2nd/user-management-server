@@ -34,7 +34,7 @@ func DeleteHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusNoContent)
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Not allowed to delete user resources",
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
 		})
 	}
 }
