@@ -19,12 +19,25 @@ func GetByTokenHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	user, err := database.GetById(dbClient, id)
-	if (fiber.Error{}) != err {
-		return c.Status(err.Code).JSON(fiber.Map{
+	isAdmin, err2 := util.IsRequestFromAdmin(c)
+	if err2 != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(user)
+	if isAdmin {
+		user, err := database.GetById(dbClient, id)
+		if (fiber.Error{}) != err {
+			return c.Status(err.Code).JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(user)
+	} else {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
+		})
+	}
 }
