@@ -34,7 +34,7 @@ func ResetPasswordHandler(c *fiber.Ctx) error {
 		return c.SendStatus(fiber.StatusOK)
 	} else {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "Must be an admin to reset someone else's password",
+			"message": database.ERROR_MESSAGE_ACCESS_RESTRICTED,
 		})
 	}
 }
