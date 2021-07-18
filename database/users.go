@@ -44,6 +44,10 @@ func Login(dbClient *UsersClient, args models.LoginArgs) (models.LoginResult, fi
 		return result, fiber.Error{Code: fiber.StatusInternalServerError, Message: "Something went wrong"}
 	}
 
+	if !user.IsAdmin {
+		return result, fiber.Error{Code: fiber.StatusUnauthorized, Message: "Access limited to admins only"}
+	}
+
 	result.Token = token
 	result.User = util.GetSafeUser(user)
 	return result, fiber.Error{}
@@ -361,7 +365,7 @@ func ChangePassword(dbClient *UsersClient, id primitive.ObjectID, args models.Ch
 	return fiber.Error{}
 }
 
-func CreateDefaultAdmin(dbClient *UsersClient, args models.CreateDefaultAdminArgs) (fiber.Error) {
+func CreateDefaultAdmin(dbClient *UsersClient, args models.CreateDefaultAdminArgs) fiber.Error {
 	user := models.User{}
 
 	validationError := validators.ValidateCreateDefaultAdminArgs(args)
